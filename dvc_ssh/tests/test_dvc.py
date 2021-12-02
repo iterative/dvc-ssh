@@ -13,6 +13,7 @@ from dvc.testing.test_workspace import (  # noqa, pylint: disable=unused-import
 def cloud_name():
     return "ssh"
 
+
 @pytest.fixture
 def remote(make_remote, cloud_name):
     yield make_remote(name="upstream", typ=cloud_name)
@@ -25,30 +26,29 @@ def workspace(make_workspace, cloud_name):
 
 @pytest.fixture
 def stage_md5():
-    raise NotImplementedError
+    return "dc24e1271084ee317ac3c2656fb8812b"
 
 
 @pytest.fixture
 def is_object_storage():
-    raise NotImplementedError
+    return False
 
 
 @pytest.fixture
 def dir_md5():
-    raise NotImplementedError
+    return "b6dcab6ccd17ca0a8bf4a215a37d14cc.dir"
 
 
 @pytest.fixture
 def hash_name():
-    raise NotImplementedError
+    return "md5"
 
 
 @pytest.fixture
 def hash_value():
-    raise NotImplementedError
+    return "8c7dd922ad47494fc02c388e12c00eac"
 
 
 @pytest.fixture
 def dir_hash_value(dir_md5):
-    raise NotImplementedError
-
+    return "b6dcab6ccd17ca0a8bf4a215a37d14cc.dir"

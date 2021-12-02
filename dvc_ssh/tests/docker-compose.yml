@@ -1,3 +1,13 @@
 ---
 version: '3.2'
 services:
+  openssh-server:
+    image: ghcr.io/linuxserver/openssh-server
+    environment:
+      - USER_NAME=user
+      - PUBLIC_KEY_FILE=/tmp/key
+    ports:
+      - 2222
+    volumes:
+      - ./user.key.pub:/tmp/key
+
