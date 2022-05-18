@@ -54,7 +54,7 @@ def ssh_connection(ssh_server):
 @pytest.fixture
 def make_ssh(ssh_server, monkeypatch):
     def _make_ssh():
-        from dvc.fs.ssh import SSHFileSystem
+        from dvc.fs import SSHFileSystem
 
         # NOTE: see http://github.com/iterative/dvc/pull/3501
         monkeypatch.setattr(SSHFileSystem, "CAN_TRAVERSE", False)
