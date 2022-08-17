@@ -2,11 +2,10 @@ import getpass
 import os.path
 import threading
 
+from dvc_objects.fs.base import FileSystem
+from dvc_objects.fs.callbacks import DEFAULT_CALLBACK
+from dvc_objects.fs.utils import as_atomic
 from funcy import cached_property, memoize, silent, wrap_prop, wrap_with
-
-from ..base import FileSystem
-from ..callbacks import DEFAULT_CALLBACK
-from ..utils import as_atomic
 
 DEFAULT_PORT = 22
 
