@@ -7,21 +7,22 @@ from dvc.testing.remote_tests import (  # noqa, pylint: disable=unused-import
 )
 from dvc.testing.workspace_tests import TestAdd as _TestAdd
 from dvc.testing.workspace_tests import TestImport as _TestImport
+from dvc.testing.workspace_tests import TestLsUrl as _TestLsUrl
 
 
 @pytest.fixture
-def cloud_name():
-    return "ssh"
+def cloud(make_cloud):
+    yield make_cloud(typ="ssh")
 
 
 @pytest.fixture
-def remote(make_remote, cloud_name):
-    yield make_remote(name="upstream", typ=cloud_name)
+def remote(make_remote):
+    yield make_remote(name="upstream", typ="ssh")
 
 
 @pytest.fixture
-def workspace(make_workspace, cloud_name):
-    yield make_workspace(name="workspace", typ=cloud_name)
+def workspace(make_workspace):
+    yield make_workspace(name="workspace", typ="ssh")
 
 
 class TestImport(_TestImport):
@@ -50,3 +51,7 @@ class TestAdd(_TestAdd):
     @pytest.fixture
     def dir_hash_value(self):
         return "b6dcab6ccd17ca0a8bf4a215a37d14cc.dir"
+
+
+class TestLsUrl(_TestLsUrl):
+    pass
