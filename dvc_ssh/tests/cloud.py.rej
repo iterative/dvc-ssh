@@ -1,0 +1,9 @@
+diff a/dvc_ssh/tests/cloud.py b/dvc_ssh/tests/cloud.py	(rejected hunks)
+@@ -1,6 +1,7 @@
+ from dvc.testing.cloud import Cloud
+ from dvc.testing.path_info import CloudURLInfo
+ 
++
+ class SSH(Cloud, CloudURLInfo):
+     @property
+     def config(self):
