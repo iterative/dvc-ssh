@@ -6,8 +6,13 @@ from dvc.testing.remote_tests import (  # noqa, pylint: disable=unused-import
     TestRemote,
 )
 from dvc.testing.workspace_tests import TestAdd as _TestAdd
+from dvc.testing.workspace_tests import (  # noqa, pylint: disable=unused-import
+    TestGetUrl,
+)
 from dvc.testing.workspace_tests import TestImport as _TestImport
-from dvc.testing.workspace_tests import TestLsUrl as _TestLsUrl
+from dvc.testing.workspace_tests import (  # noqa, pylint: disable=unused-import
+    TestLsUrl,
+)
 
 
 @pytest.fixture
@@ -51,7 +56,3 @@ class TestAdd(_TestAdd):
     @pytest.fixture
     def dir_hash_value(self):
         return "b6dcab6ccd17ca0a8bf4a215a37d14cc.dir"
-
-
-class TestLsUrl(_TestLsUrl):
-    pass
