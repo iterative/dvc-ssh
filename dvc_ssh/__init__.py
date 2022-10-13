@@ -12,10 +12,9 @@ DEFAULT_PORT = 22
 
 @wrap_with(threading.Lock())
 @memoize
-def ask_password(host, user, port):
+def ask_password(host, user, port, desc):
     return getpass.getpass(
-        "Enter a private key passphrase or a password for "
-        f"host '{host}' port '{port}' user '{user}':\n"
+        f"Enter a {desc} for " f"host '{host}' port '{port}' user '{user}':\n"
     )
 
 
@@ -62,13 +61,16 @@ class SSHFileSystem(FileSystem):
             or DEFAULT_PORT
         )
 
-        if config.get("ask_password") and config.get("password") is None:
-            config["password"] = ask_password(
-                login_info["host"], login_info["username"], login_info["port"]
-            )
+        for option in ("password", "passphrase"):
+            login_info[option] = config.get(option, None)
 
-        login_info["password"] = config.get("password")
-        login_info["passphrase"] = config.get("password")
+            if config.get(f"ask_{option}") and login_info[option] is None:
+                login_info[option] = ask_password(
+                    login_info["host"],
+                    login_info["username"],
+                    login_info["port"],
+                    option,
+                )
 
         raw_keys = []
         if config.get("keyfile"):
