@@ -1,3 +1,5 @@
+# pylint: disable=redefined-outer-name
+
 import os
 
 import pytest
@@ -6,12 +8,14 @@ from .cloud import SSH, TEST_SSH_KEY_PATH, TEST_SSH_USER
 
 
 @pytest.fixture(scope="session")
-def docker_compose_file(pytestconfig):
+def docker_compose_file(pytestconfig):  # pylint: disable=unused-argument
     return os.path.join(os.path.dirname(__file__), "docker-compose.yml")
 
 
 @pytest.fixture(scope="session")
-def ssh_server(docker_compose, docker_services):
+def ssh_server(  # pylint: disable=unused-argument
+    docker_compose, docker_services
+):
     import asyncssh
     from sshfs import SSHFileSystem
 
