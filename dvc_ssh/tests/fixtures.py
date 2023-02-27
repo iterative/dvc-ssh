@@ -13,9 +13,7 @@ def docker_compose_file(pytestconfig):  # pylint: disable=unused-argument
 
 
 @pytest.fixture(scope="session")
-def ssh_server(  # pylint: disable=unused-argument
-    docker_compose, docker_services
-):
+def ssh_server(docker_services):
     import asyncssh
     from sshfs import SSHFileSystem
 
