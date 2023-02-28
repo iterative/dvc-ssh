@@ -41,7 +41,7 @@ jobs:
       run: |
         pip install --upgrade pip wheel
         pip install -e ".[tests]"
-        pip install "dvc[testing] @ git+https://github.com/iterative/dvc"
+        pip install "dvc[testing] @ git+https://github.com/iterative/dvc@fix-docker-lockfile"
 
     - name: lint
       timeout-minutes: 10
