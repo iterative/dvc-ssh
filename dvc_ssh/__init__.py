@@ -107,6 +107,8 @@ class SSHFileSystem(FileSystem):
         # something like paramiko's AutoAddPolicy()
         login_info["known_hosts"] = None
 
+        if "max_sessions" in config:
+            login_info["max_sessions"] = config["max_sessions"]
         return login_info
 
     @wrap_prop(threading.Lock())
