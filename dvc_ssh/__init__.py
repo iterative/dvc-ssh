@@ -106,6 +106,7 @@ class SSHFileSystem(FileSystem):
         # We are going to automatically add stuff to known_hosts
         # something like paramiko's AutoAddPolicy()
         login_info["known_hosts"] = None
+
         return login_info
 
     @wrap_prop(threading.Lock())
