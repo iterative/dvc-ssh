@@ -32,7 +32,7 @@ def workspace(make_workspace):
 class TestImport(_TestImport):
     @pytest.fixture
     def stage_md5(self):
-        return "dc24e1271084ee317ac3c2656fb8812b"
+        return "7033ee831f78a4dfec2fc71405516067"
 
     @pytest.fixture
     def is_object_storage(self):
