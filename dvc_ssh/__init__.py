@@ -13,9 +13,13 @@ DEFAULT_PORT = 22
 @wrap_with(threading.Lock())
 @memoize
 def ask_password(host, user, port, desc):
-    return getpass.getpass(
-        f"Enter a {desc} for " f"host '{host}' port '{port}' user '{user}':\n"
-    )
+    try:
+        return getpass.getpass(
+            f"Enter a {desc} for "
+            f"host '{host}' port '{port}' user '{user}':\n"
+        )
+    except EOFError:
+        return None
 
 
 # pylint:disable=abstract-method
