@@ -117,7 +117,7 @@ class SSHFileSystem(FileSystem):
 
     @wrap_prop(threading.Lock())
     @cached_property
-    def fs(self):
+    def fs(self):  # pylint: disable=invalid-overridden-method
         from sshfs import SSHFileSystem as _SSHFileSystem
 
         return _SSHFileSystem(**self.fs_args)
