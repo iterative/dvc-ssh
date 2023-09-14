@@ -24,7 +24,6 @@ def ask_password(host, user, port, desc):
         return None
 
 
-# pylint:disable=abstract-method
 class SSHFileSystem(FileSystem):
     protocol = "ssh"
     REQUIRES: ClassVar[dict[str, str]] = {"sshfs": "sshfs"}
@@ -43,11 +42,16 @@ class SSHFileSystem(FileSystem):
         return f"ssh://{host}:{port}/{path}"
 
     def _prepare_credentials(self, **config):
-        self.CAN_TRAVERSE = True
         from sshfs.config import parse_config
 
-        login_info = {}
+        from .client import InteractiveSSHClient
 
+        self.CAN_TRAVERSE = True
+
+        login_info = {}
+        login_info["client_factory"] = config.get(
+            "client_factory", InteractiveSSHClient
+        )
         try:
             user_ssh_config = parse_config(host=config["host"])
         except FileNotFoundError:
