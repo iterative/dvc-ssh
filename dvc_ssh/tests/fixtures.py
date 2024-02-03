@@ -45,7 +45,7 @@ def ssh_server(docker_services):
 def ssh_connection(ssh_server):
     from sshfs import SSHFileSystem
 
-    yield SSHFileSystem(
+    return SSHFileSystem(
         host=ssh_server["host"],
         port=ssh_server["port"],
         username=TEST_SSH_USER,
