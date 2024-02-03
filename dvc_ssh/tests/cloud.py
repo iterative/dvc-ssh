@@ -1,9 +1,10 @@
 import os
 import uuid
 
+from funcy import cached_property
+
 from dvc.testing.cloud import Cloud
 from dvc.testing.path_info import URLInfo
-from funcy import cached_property
 
 TEST_SSH_USER = "user"
 TEST_SSH_KEY_PATH = os.path.join(
