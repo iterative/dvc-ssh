@@ -3,11 +3,11 @@ import os.path
 import threading
 from typing import ClassVar
 
+from fsspec.callbacks import DEFAULT_CALLBACK
 from funcy import memoize, silent, wrap_prop, wrap_with
 
 from dvc.utils.objects import cached_property
 from dvc_objects.fs.base import FileSystem
-from dvc_objects.fs.callbacks import DEFAULT_CALLBACK
 from dvc_objects.fs.utils import as_atomic
 
 DEFAULT_PORT = 22
