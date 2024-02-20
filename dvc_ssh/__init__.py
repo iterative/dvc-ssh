@@ -3,7 +3,6 @@ import os.path
 import threading
 from typing import ClassVar
 
-from fsspec.callbacks import DEFAULT_CALLBACK
 from funcy import memoize, silent, wrap_prop, wrap_with
 
 from dvc.utils.objects import cached_property
@@ -137,11 +136,7 @@ class SSHFileSystem(FileSystem):
         self,
         from_file,
         to_info,
-        callback=DEFAULT_CALLBACK,
-        size=None,
         **kwargs,
     ):
         with as_atomic(self, to_info) as tmp_file:
-            super().put_file(
-                from_file, tmp_file, callback=callback, size=size, **kwargs
-            )
+            super().put_file(from_file, tmp_file, **kwargs)
