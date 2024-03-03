@@ -43,7 +43,7 @@ tests = [
     "pytest-cov>=4.1.0",
     "pytest-xdist>=3.2",
     "pytest-mock",
-    "pytest-docker>=1,<2",
+    "pytest-docker>=1,<4",
 ]
 
 [project.urls]
