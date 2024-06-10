@@ -26,8 +26,8 @@ if TYPE_CHECKING:
 class InteractiveSSHClient(SSHClient):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._conn: Optional["SSHClientConnection"] = None
-        self._keys_to_try: Optional[list["FilePath"]] = None
+        self._conn: Optional[SSHClientConnection] = None
+        self._keys_to_try: Optional[list[FilePath]] = None
         self._passphrases: dict[str, str] = {}
 
     def connection_made(self, conn: "SSHClientConnection") -> None:
@@ -69,7 +69,7 @@ class InteractiveSSHClient(SSHClient):
             except KeyImportError:
                 continue
             try:
-                pubkey: Optional["SSHKey"] = read_public_key(pubkey_to_load)
+                pubkey: Optional[SSHKey] = read_public_key(pubkey_to_load)
             except (OSError, KeyImportError):
                 pubkey = None
             return SSHLocalKeyPair(key, pubkey)
