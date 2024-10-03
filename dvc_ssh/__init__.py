@@ -71,7 +71,7 @@ class SSHFileSystem(FileSystem):
         )
 
         for option in ("password", "passphrase"):
-            login_info[option] = config.get(option, None)
+            login_info[option] = config.get(option)
 
             if config.get(f"ask_{option}") and login_info[option] is None:
                 login_info[option] = ask_password(
