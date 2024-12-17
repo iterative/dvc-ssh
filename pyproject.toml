@@ -29,6 +29,7 @@ classifiers = [
 dynamic = ["version"]
 dependencies = [
     "dvc",
+    "asyncssh<=2.18.0",
     "sshfs[bcrypt]>=2023.4.1",
 ]
 
