@@ -93,7 +93,7 @@ class SSHFileSystem(FileSystem):
         )
         try:
             user_ssh_config = parse_config(
-                host=config["host"], port=config.get("port", DEFAULT_PORT)
+                host=config["host"], port=config.get("port"))
             )
         except FileNotFoundError:
             user_ssh_config = {}
