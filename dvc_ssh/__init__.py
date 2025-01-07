@@ -42,7 +42,8 @@ def parse_config(*, host, user=(), port=(), local_user=None, config_files=None):
 
     if config_files:
         if isinstance(config_files, (str, PurePath)):
-            paths: Sequence[FilePath] = [config_files]
+            # paths: Sequence[FilePath] = [config_files] #lint issue
+            paths = [config_files]
         else:
             paths = config_files
 
