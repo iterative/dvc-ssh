@@ -9,7 +9,52 @@ from dvc.utils.objects import cached_property
 from dvc_objects.fs.base import FileSystem
 from dvc_objects.fs.utils import as_atomic
 
+
+import getpass
+from contextlib import suppress
+from pathlib import Path, PurePath
+from typing import Sequence, Union
+from asyncssh.config import SSHClientConfig
+
+SSH_CONFIG = Path("~", ".ssh", "config").expanduser()
+FilePath = Union[str, PurePath]
+
 DEFAULT_PORT = 22
+
+def parse_config(
+    *, host, user=(), port=(), local_user=None, config_files=None
+):
+    if config_files is None:
+        config_files = [SSH_CONFIG]
+
+    if local_user is None:
+        with suppress(KeyError):
+            local_user = getpass.getuser()
+
+    last_config = None
+    reload = False
+    config = SSHClientConfig(
+        last_config =last_config,
+        reload = reload,
+        canonical = False,
+        final=False,
+        local_user = local_user,
+        user = user,
+        host = host,
+        port = port,
+    )
+
+    if config_files:
+        if isinstance(config_files, (str, PurePath)):
+            paths: Sequence[FilePath] = [config_files]
+        else:
+            paths = config_files
+
+        for path in paths:
+            config.parse(Path(path))
+        config.loaded = True
+    return config
+
 
 
 @wrap_with(threading.Lock())
@@ -41,7 +86,7 @@ class SSHFileSystem(FileSystem):
         return f"ssh://{host}:{port}/{path}"
 
     def _prepare_credentials(self, **config):
-        from sshfs.config import parse_config
+        # from sshfs.config import parse_config
 
         from .client import InteractiveSSHClient
 
@@ -52,16 +97,8 @@ class SSHFileSystem(FileSystem):
             "client_factory", InteractiveSSHClient
         )
         try:
-            assert config.get("host") is not None
-            user_ssh_config = parse_config(
-                host=config["host"], port=config.get("port", DEFAULT_PORT)
-            )
-
+            user_ssh_config = parse_config(host=config["host"], port=config.get("port", DEFAULT_PORT))
         except FileNotFoundError:
-            user_ssh_config = {}
-        except AssertionError:
-            # host could have been None
-            # just doing this to check if test passes
             user_ssh_config = {}
 
         login_info["host"] = user_ssh_config.get("Hostname", config["host"])
