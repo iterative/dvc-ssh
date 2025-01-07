@@ -1,29 +1,25 @@
 import getpass
 import os.path
 import threading
-from typing import ClassVar
+from collections.abc import Sequence
+from contextlib import suppress
+from pathlib import Path, PurePath
+from typing import ClassVar, Union
 
+from asyncssh.config import SSHClientConfig
 from funcy import memoize, silent, wrap_prop, wrap_with
 
 from dvc.utils.objects import cached_property
 from dvc_objects.fs.base import FileSystem
 from dvc_objects.fs.utils import as_atomic
 
-
-import getpass
-from contextlib import suppress
-from pathlib import Path, PurePath
-from typing import Sequence, Union
-from asyncssh.config import SSHClientConfig
-
 SSH_CONFIG = Path("~", ".ssh", "config").expanduser()
 FilePath = Union[str, PurePath]
 
 DEFAULT_PORT = 22
 
-def parse_config(
-    *, host, user=(), port=(), local_user=None, config_files=None
-):
+
+def parse_config(*, host, user=(), port=(), local_user=None, config_files=None):
     if config_files is None:
         config_files = [SSH_CONFIG]
 
@@ -34,14 +30,14 @@ def parse_config(
     last_config = None
     reload = False
     config = SSHClientConfig(
-        last_config =last_config,
-        reload = reload,
-        canonical = False,
+        last_config=last_config,
+        reload=reload,
+        canonical=False,
         final=False,
-        local_user = local_user,
-        user = user,
-        host = host,
-        port = port,
+        local_user=local_user,
+        user=user,
+        host=host,
+        port=port,
     )
 
     if config_files:
@@ -54,7 +50,6 @@ def parse_config(
             config.parse(Path(path))
         config.loaded = True
     return config
-
 
 
 @wrap_with(threading.Lock())
@@ -97,7 +92,9 @@ class SSHFileSystem(FileSystem):
             "client_factory", InteractiveSSHClient
         )
         try:
-            user_ssh_config = parse_config(host=config["host"], port=config.get("port", DEFAULT_PORT))
+            user_ssh_config = parse_config(
+                host=config["host"], port=config.get("port", DEFAULT_PORT)
+            )
         except FileNotFoundError:
             user_ssh_config = {}
 
