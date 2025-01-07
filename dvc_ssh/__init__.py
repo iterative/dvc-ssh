@@ -52,7 +52,7 @@ class SSHFileSystem(FileSystem):
             "client_factory", InteractiveSSHClient
         )
         try:
-            user_ssh_config = parse_config(host=config["host"], port=config["port"])
+            user_ssh_config = parse_config(host=config["host"], port=config.get("port", DEFAULT_PORT))
         except FileNotFoundError:
             user_ssh_config = {}
 
