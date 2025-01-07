@@ -52,11 +52,15 @@ class SSHFileSystem(FileSystem):
             "client_factory", InteractiveSSHClient
         )
         try:
+            assert config.get("host) is not None
             user_ssh_config = parse_config(
                 host=config["host"], port=config.get("port", DEFAULT_PORT)
             )
 
         except FileNotFoundError:
+            user_ssh_config = {}
+        except Exception:
+            # host could have been None
             user_ssh_config = {}
 
         login_info["host"] = user_ssh_config.get("Hostname", config["host"])
