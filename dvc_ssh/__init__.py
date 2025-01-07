@@ -1,7 +1,6 @@
 import getpass
 import os.path
 import threading
-from collections.abc import Sequence
 from contextlib import suppress
 from pathlib import Path, PurePath
 from typing import ClassVar, Union
