@@ -59,7 +59,7 @@ class SSHFileSystem(FileSystem):
 
         except FileNotFoundError:
             user_ssh_config = {}
-        except Exception:
+        except AssertionError:
             # host could have been None
             # just doing this to check if test passes
             user_ssh_config = {}
