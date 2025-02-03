@@ -17,7 +17,7 @@ DEFAULT_PORT = 22
 def ask_password(host, user, port, desc):
     try:
         return getpass.getpass(
-            f"Enter a {desc} for " f"host '{host}' port '{port}' user '{user}':\n"
+            f"Enter a {desc} for host '{host}' port '{port}' user '{user}':\n"
         )
     except EOFError:
         return None
