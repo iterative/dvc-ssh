@@ -3,22 +3,27 @@ import os.path
 import threading
 from typing import ClassVar
 
-from funcy import memoize, silent, wrap_prop, wrap_with
+from funcy import memoize, wrap_prop, wrap_with
 
 from dvc.utils.objects import cached_property
 from dvc_objects.fs.base import FileSystem
 from dvc_objects.fs.utils import as_atomic
 
-DEFAULT_PORT = 22
-
 
 @wrap_with(threading.Lock())
 @memoize
 def ask_password(host, user, port, desc):
+    prompt = f"Enter a {desc} for"
+    if user:
+        prompt += f" {user}@{host}"
+    else:
+        prompt += f" {host}"
+    if port:
+        prompt += f":{port}"
+    prompt += ":\n"
+
     try:
-        return getpass.getpass(
-            f"Enter a {desc} for " f"host '{host}' port '{port}' user '{user}':\n"
-        )
+        return getpass.getpass(prompt)
     except EOFError:
         return None
 
@@ -41,8 +46,6 @@ class SSHFileSystem(FileSystem):
         return f"ssh://{host}:{port}/{path}"
 
     def _prepare_credentials(self, **config):
-        from sshfs.config import parse_config
-
         from .client import InteractiveSSHClient
 
         self.CAN_TRAVERSE = True
@@ -51,24 +54,11 @@ class SSHFileSystem(FileSystem):
         login_info["client_factory"] = config.get(
             "client_factory", InteractiveSSHClient
         )
-        try:
-            user_ssh_config = parse_config(host=config["host"])
-        except FileNotFoundError:
-            user_ssh_config = {}
-
-        login_info["host"] = user_ssh_config.get("Hostname", config["host"])
-
-        login_info["username"] = (
-            config.get("user")
-            or config.get("username")
-            or user_ssh_config.get("User")
-            or getpass.getuser()
-        )
-        login_info["port"] = (
-            config.get("port")
-            or silent(int)(user_ssh_config.get("Port"))
-            or DEFAULT_PORT
-        )
+        login_info["host"] = config["host"]
+        if username := (config.get("user") or config.get("username")):
+            login_info["username"] = username
+        if port := config.get("port"):
+            login_info["port"] = port
 
         for option in ("password", "passphrase"):
             login_info[option] = config.get(option)
@@ -76,19 +66,13 @@ class SSHFileSystem(FileSystem):
             if config.get(f"ask_{option}") and login_info[option] is None:
                 login_info[option] = ask_password(
                     login_info["host"],
-                    login_info["username"],
-                    login_info["port"],
+                    login_info.get("username"),
+                    login_info.get("port"),
                     option,
                 )
 
-        raw_keys = []
-        if config.get("keyfile"):
-            raw_keys.append(config.get("keyfile"))
-        elif user_ssh_config.get("IdentityFile"):
-            raw_keys.extend(user_ssh_config.get("IdentityFile"))
-
-        if raw_keys:
-            login_info["client_keys"] = [os.path.expanduser(key) for key in raw_keys]
+        if keyfile := config.get("keyfile"):
+            login_info["client_keys"] = [os.path.expanduser(keyfile)]
 
         login_info["timeout"] = config.get("timeout", 1800)
 
@@ -108,11 +92,6 @@ class SSHFileSystem(FileSystem):
 
         login_info["gss_auth"] = config.get("gss_auth", False)
         login_info["agent_forwarding"] = config.get("agent_forwarding", True)
-        login_info["proxy_command"] = user_ssh_config.get("ProxyCommand")
-
-        # We are going to automatically add stuff to known_hosts
-        # something like paramiko's AutoAddPolicy()
-        login_info["known_hosts"] = None
 
         if "max_sessions" in config:
             login_info["max_sessions"] = config["max_sessions"]
