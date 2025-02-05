@@ -124,3 +124,16 @@ class InteractiveSSHClient(SSHClient):
             p = await _getpass(f"{prompt_prefix}{prompt}")
             response.append(p.rstrip())
         return response
+
+    async def password_auth_requested(self) -> str:
+        assert self._conn is not None
+        options = self._conn._options
+        prompt = "Password: "
+        addr = "@".join(filter(None, (options.username, options.host)))
+        if addr:
+            prompt = f"{addr}'s password: "
+
+        # NOTE: we write an extra line otherwise the prompt will be written on
+        # the same line as any active tqdm progress bars
+        sys.stderr.write(os.linesep)
+        return await _getpass(prompt)
