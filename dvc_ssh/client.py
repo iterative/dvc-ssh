@@ -5,26 +5,24 @@ from collections.abc import Sequence
 from getpass import getpass
 from typing import TYPE_CHECKING, Optional, cast
 
-from asyncssh import SSHClient
-from asyncssh.public_key import (
-    _DEFAULT_KEY_FILES,
+from asyncssh import (
     KeyEncryptionError,
     KeyImportError,
-    SSHLocalKeyPair,
+    SSHClient,
     read_private_key,
     read_public_key,
 )
+from asyncssh.public_key import _DEFAULT_KEY_FILES, SSHLocalKeyPair
 
 if TYPE_CHECKING:
+    from asyncssh import SSHClientConnection, SSHKey
     from asyncssh.auth import KbdIntPrompts, KbdIntResponse
-    from asyncssh.config import FilePath
-    from asyncssh.connection import SSHClientConnection
-    from asyncssh.misc import MaybeAwait
-    from asyncssh.public_key import KeyPairListArg, SSHKey
+    from asyncssh.misc import FilePath
+    from asyncssh.public_key import KeyPairListArg
 
 
 class InteractiveSSHClient(SSHClient):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._conn: Optional[SSHClientConnection] = None
         self._keys_to_try: Optional[list[FilePath]] = None
@@ -95,7 +93,7 @@ class InteractiveSSHClient(SSHClient):
                     pass
         raise KeyImportError("Incorrect passphrase")
 
-    def kbdint_auth_requested(self) -> "MaybeAwait[Optional[str]]":
+    def kbdint_auth_requested(self) -> str:
         return ""
 
     async def kbdint_challenge_received(
