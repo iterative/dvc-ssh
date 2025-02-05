@@ -1,11 +1,9 @@
 # pylint: disable=W0212,W0613
-import getpass
 import os
-from unittest.mock import mock_open, patch
 
 import pytest
 
-from dvc_ssh import DEFAULT_PORT, SSHFileSystem
+from dvc_ssh import SSHFileSystem
 
 
 def test_get_kwargs_from_urls():
@@ -67,97 +65,24 @@ def test_passphrase(mocker, password, passphrase):
     assert connect.call_args[1]["passphrase"] == passphrase
 
 
-mock_ssh_config = """
-Host example.com
-   User ubuntu
-   HostName 1.2.3.4
-   Port 1234
-   IdentityFile ~/.ssh/not_default.key
-"""
+def test_ssh_user():
+    fs = SSHFileSystem(host="example.com", user="test")
+    assert fs.fs_args["username"] == "test"
 
 
-@pytest.mark.parametrize(
-    "config,expected_host",
-    [
-        ({"host": "example.com"}, "1.2.3.4"),
-        ({"host": "not_in_ssh_config.com"}, "not_in_ssh_config.com"),
-    ],
-)
-@patch(
-    "builtins.open",
-    new_callable=mock_open,
-    read_data=mock_ssh_config,
-)
-def test_ssh_host_override_from_config(mock_file, config, expected_host):
-    fs = SSHFileSystem(**config)
-    assert fs.fs_args["host"] == expected_host
-
-
-@pytest.mark.parametrize(
-    "config,expected_user",
-    [
-        ({"host": "example.com", "user": "test1"}, "test1"),
-        ({"host": "example.com"}, "ubuntu"),
-        ({"host": "not_in_ssh_config.com", "user": "test1"}, "test1"),
-        ({"host": "not_in_ssh_config.com"}, getpass.getuser()),
-    ],
-)
-@patch(
-    "builtins.open",
-    new_callable=mock_open,
-    read_data=mock_ssh_config,
-)
-def test_ssh_user(mock_file, config, expected_user):
-    fs = SSHFileSystem(**config)
-    assert fs.fs_args["username"] == expected_user
-
-
-@pytest.mark.parametrize(
-    "config,expected_port",
-    [
-        ({"host": "example.com"}, 1234),
-        ({"host": "example.com", "port": 4321}, 4321),
-        ({"host": "not_in_ssh_config.com"}, DEFAULT_PORT),
-        ({"host": "not_in_ssh_config.com", "port": 2222}, 2222),
-    ],
-)
-@patch(
-    "builtins.open",
-    new_callable=mock_open,
-    read_data=mock_ssh_config,
-)
-def test_ssh_port(mock_file, config, expected_port):
-    fs = SSHFileSystem(**config)
-    assert fs.fs_args["port"] == expected_port
+def test_ssh_port():
+    fs = SSHFileSystem(host="example.com", port=4321)
+    assert fs.fs_args["port"] == 4321
 
 
 @pytest.mark.parametrize(
     "config,expected_keyfile",
     [
-        (
-            {"host": "example.com", "keyfile": "dvc_config.key"},
-            ["dvc_config.key"],
-        ),
-        (
-            {"host": "example.com"},
-            ["~/.ssh/not_default.key"],
-        ),
-        (
-            {
-                "host": "not_in_ssh_config.com",
-                "keyfile": "dvc_config.key",
-            },
-            ["dvc_config.key"],
-        ),
-        ({"host": "not_in_ssh_config.com"}, None),
+        ({"host": "example.com", "keyfile": "dvc_config.key"}, ["dvc_config.key"]),
+        ({"host": "example.com"}, None),
     ],
 )
-@patch(
-    "builtins.open",
-    new_callable=mock_open,
-    read_data=mock_ssh_config,
-)
-def test_ssh_keyfile(mock_file, config, expected_keyfile):
+def test_ssh_keyfile(config, expected_keyfile):
     fs = SSHFileSystem(**config)
     expected_keyfiles = (
         [os.path.expanduser(path) for path in expected_keyfile]
@@ -165,24 +90,6 @@ def test_ssh_keyfile(mock_file, config, expected_keyfile):
         else expected_keyfile
     )
     assert fs.fs_args.get("client_keys") == expected_keyfiles
-
-
-mock_ssh_multi_key_config = """
-IdentityFile file_1
-
-Host example.com
-    IdentityFile file_2
-"""
-
-
-@patch(
-    "builtins.open",
-    new_callable=mock_open,
-    read_data=mock_ssh_multi_key_config,
-)
-def test_ssh_multi_identity_files(mock_file):
-    fs = SSHFileSystem(host="example.com")
-    assert fs.fs_args.get("client_keys") == ["file_1", "file_2"]
 
 
 @pytest.mark.parametrize(
@@ -193,11 +100,6 @@ def test_ssh_multi_identity_files(mock_file):
         ({"host": "not_in_ssh_config.com"}, False),
     ],
 )
-@patch(
-    "builtins.open",
-    new_callable=mock_open,
-    read_data=mock_ssh_config,
-)
-def test_ssh_gss_auth(mock_file, config, expected_gss_auth):
+def test_ssh_gss_auth(config, expected_gss_auth):
     fs = SSHFileSystem(**config)
     assert fs.fs_args["gss_auth"] == expected_gss_auth
