@@ -21,6 +21,10 @@ if TYPE_CHECKING:
     from asyncssh.public_key import KeyPairListArg
 
 
+async def _getpass(*args, **kwargs) -> str:
+    return await asyncio.to_thread(getpass, *args, **kwargs)
+
+
 class InteractiveSSHClient(SSHClient):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -79,11 +83,8 @@ class InteractiveSSHClient(SSHClient):
         if passphrase:
             return read_private_key(path, passphrase=passphrase)
 
-        loop = asyncio.get_running_loop()
         for _ in range(3):
-            passphrase = await loop.run_in_executor(
-                None, getpass, f"Enter passphrase for key '{path}': "
-            )
+            passphrase = await _getpass(f"Enter passphrase for key {path!r}: ")
             if passphrase:
                 try:
                     key = read_private_key(path, passphrase=passphrase)
@@ -105,27 +106,21 @@ class InteractiveSSHClient(SSHClient):
     ) -> Optional["KbdIntResponse"]:
         assert self._conn is not None
         options = self._conn._options
-        username = f"{options.username}" if options.username else ""
-        if options.host:
-            prompt_prefix = f"({username}@{options.host}) "
-        elif username:
-            prompt_prefix = f"({username}) "
-        else:
-            prompt_prefix = ""
-
-        def _getpass(prompt: str) -> str:
-            prompt = f"{prompt_prefix}{prompt}"
-            return getpass(prompt=prompt).rstrip()
+        prompt_prefix = ""
+        addr = "@".join(filter(None, (options.username, options.host)))
+        if addr:
+            prompt_prefix = f"({addr}) "
+        if name:
+            prompt_prefix += f"({name}) "
 
         # NOTE: we write an extra line otherwise the prompt will be written on
         # the same line as any active tqdm progress bars
         sys.stderr.write(os.linesep)
         if instructions:
             sys.stderr.write(f"{instructions}{os.linesep}")
-        loop = asyncio.get_running_loop()
-        return [
-            await loop.run_in_executor(
-                None, _getpass, f"({name}) {prompt}" if name else prompt
-            )
-            for prompt, _ in prompts
-        ]
+
+        response: list[str] = []
+        for prompt, _echo in prompts:
+            p = await _getpass(f"{prompt_prefix}{prompt}")
+            response.append(p.rstrip())
+        return response
