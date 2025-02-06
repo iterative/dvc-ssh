@@ -41,9 +41,14 @@ class SSHFileSystem(FileSystem):
 
     def unstrip_protocol(self, path: str) -> str:
         host = self.fs_args["host"]
-        port = self.fs_args["port"]
+        port = self.fs_args.get("port")
         path = path.lstrip("/")
-        return f"ssh://{host}:{port}/{path}"
+
+        url = f"ssh://{host}"
+        if port:
+            url += f":{port}"
+        url += f"/{path}"
+        return url
 
     def _prepare_credentials(self, **config):
         from .client import InteractiveSSHClient
