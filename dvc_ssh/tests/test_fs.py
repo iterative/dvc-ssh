@@ -103,3 +103,17 @@ def test_ssh_keyfile(config, expected_keyfile):
 def test_ssh_gss_auth(config, expected_gss_auth):
     fs = SSHFileSystem(**config)
     assert fs.fs_args["gss_auth"] == expected_gss_auth
+
+
+@pytest.mark.parametrize(
+    "config,path,expected_path",
+    [
+        ({"host": "example.com"}, "path", "ssh://example.com/path"),
+        ({"host": "example.com"}, "/path", "ssh://example.com/path"),
+        ({"host": "example.com", "port": 1234}, "path", "ssh://example.com:1234/path"),
+        ({"host": "example.com", "port": 1234}, "/path", "ssh://example.com:1234/path"),
+    ],
+)
+def test_unstrip_protocol(mocker, config, path, expected_path):
+    fs = SSHFileSystem(**config, fs=mocker.MagicMock())
+    assert fs.unstrip_protocol(path) == expected_path
