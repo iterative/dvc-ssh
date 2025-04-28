@@ -1,7 +1,6 @@
 import asyncio
 import os
 import sys
-from collections.abc import Sequence
 from getpass import getpass
 from typing import TYPE_CHECKING, Optional, cast
 
@@ -15,6 +14,8 @@ from asyncssh import (
 from asyncssh.public_key import _DEFAULT_KEY_FILES, SSHLocalKeyPair
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from asyncssh import SSHClientConnection, SSHKey
     from asyncssh.auth import KbdIntPrompts, KbdIntResponse
     from asyncssh.misc import FilePath
