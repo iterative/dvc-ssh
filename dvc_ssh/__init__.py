@@ -105,9 +105,9 @@ class SSHFileSystem(FileSystem):
     @wrap_prop(threading.Lock())
     @cached_property
     def fs(self):
-        from sshfs import SSHFileSystem as _SSHFileSystem
+        from . import spec
 
-        return _SSHFileSystem(**self.fs_args)
+        return spec.SSHFileSystem(**self.fs_args)
 
     # Ensure that if an interrupt happens during the transfer, we don't
     # pollute the cache.
@@ -115,12 +115,3 @@ class SSHFileSystem(FileSystem):
     def upload_fobj(self, fobj, to_info, **kwargs):
         with as_atomic(self, to_info) as tmp_file:
             super().upload_fobj(fobj, tmp_file, **kwargs)
-
-    def put_file(
-        self,
-        from_file,
-        to_info,
-        **kwargs,
-    ):
-        with as_atomic(self, to_info) as tmp_file:
-            super().put_file(from_file, tmp_file, **kwargs)
