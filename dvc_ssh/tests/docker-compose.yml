@@ -5,7 +5,9 @@ services:
     image: ghcr.io/linuxserver/openssh-server
     environment:
       - USER_NAME=user
+      - USER_PASSWORD=password
       - PUBLIC_KEY_FILE=/tmp/key
+      - PASSWORD_ACCESS=true
     ports:
       - 2222
     volumes:
