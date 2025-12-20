@@ -65,8 +65,19 @@ class SSHFileSystem(FileSystem):
         if port := config.get("port"):
             login_info["port"] = port
 
+        # in case preferred_auth is empty, fallback is publickey
+        login_info["preferred_auth"] = []
+
         for option in ("password", "passphrase"):
             login_info[option] = config.get(option)
+
+            if login_info[option] or config.get(f"ask_{option}"):
+                login_info["preferred_auth"].append(
+                    {
+                        "password": "password",
+                        "passphrase": "publickey",
+                    }[option]
+                )
 
             if config.get(f"ask_{option}") and login_info[option] is None:
                 login_info[option] = ask_password(
